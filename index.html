@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Угадай пароль</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Tektur:wght@400..900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #121212;
+            color: #0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+
+            font-family: "Tektur", sans-serif;
+            font-optical-sizing: auto;
+            font-style: normal;
+            font-variation-settings: "wdth" 100;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            border: 1px solid #0f0;
+        }
+
+        .display {
+            background-color: #0a240a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid #0f0;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .digit {
+            display: inline-block;
+            width: 40px;
+            height: 60px;
+            background-color: #082108;
+            border-radius: 5px;
+            margin: 0 5px;
+            position: relative;
+            border: 1px solid #0f0;
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+        }
+
+        .digit.correct {
+            background-color: #0a380a;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+        }
+
+        .digit span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #0f0;
+            text-shadow: 0 0 5px #0f0;
+        }
+
+        .info {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 16px;
+            color: #0f0;
+            text-shadow: 0 0 3px #0f0;
+        }
+
+        .keypad__container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .key {
+            background-color: #082108;
+            border: 2px solid #0f0;
+            border-radius: 5px;
+            color: #0f0;
+            font-size: 20px;
+            padding: 15px 0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-shadow: 0 0 3px #0f0;
+        }
+
+        .key:hover {
+            background-color: #0a380a;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .key:active {
+            transform: scale(0.95);
+        }
+
+        .key.inactive {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #380a0a;
+            border-color: #f00;
+        }
+
+        .key.inactive:hover {
+            background-color: #380a0a;
+            box-shadow: none;
+        }
+
+        .key.guessed {
+            opacity: 0.7;
+            cursor: not-allowed;
+            background-color: #0a380a;
+            border-color: #0f0;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .key.guessed:hover {
+            background-color: #0a380a;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .zero-key {
+            grid-column: 2;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+        }
+
+        button {
+            background-color: #082108;
+            border: 2px solid #0f0;
+            border-radius: 5px;
+            color: #0f0;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-shadow: 0 0 3px #0f0;
+        }
+
+        button:hover {
+            background-color: #0a380a;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .difficulty {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 4px 10px;
+            font-size: 14px;
+        }
+
+        .difficulty-btn.active {
+            background-color: #0a380a;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .attempts {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            gap: 5px;
+        }
+
+        .attempt {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #082108;
+            border: 1px solid #0f0;
+        }
+
+        .attempt.used {
+            background-color: #ff0000;
+            box-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 10px;
+            min-height: 24px;
+            font-size: 16px;
+            color: #0f0;
+            text-shadow: 0 0 3px #0f0;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1 style="text-align: center; margin-bottom: 20px; text-shadow: 0 0 5px #0f0;">УГАДАЙ ПАРОЛЬ</h1>
+
+    <div class="difficulty">
+        <button class="difficulty-btn active" data-level="4">4 цифры</button>
+        <button class="difficulty-btn" data-level="5">5 цифр</button>
+        <button class="difficulty-btn" data-level="6">6 цифр</button>
+        <button class="difficulty-btn" data-level="7">7 цифр</button>
+        <!--<button class="difficulty-btn" data-level="8">8 цифр</button>
+        <button class="difficulty-btn" data-level="9">9 цифр</button>
+        <button class="difficulty-btn" data-level="10">10 цифр</button>-->
+    </div>
+
+    <div class="info">
+        <p>У вас есть 3 попытки на каждую цифру.</p>
+        <p>Текущая цифра: <span id="currentDigit">1</span></p>
+    </div>
+
+    <div class="attempts">
+        <div class="attempt"></div>
+        <div class="attempt"></div>
+        <div class="attempt"></div>
+    </div>
+
+    <div class="display" id="numberDisplay"></div>
+
+    <div class="message" id="message"></div>
+
+    <div class="keypad__container">
+        <div class="keypad">
+            <div class="key" data-value="1">1</div>
+            <div class="key" data-value="2">2</div>
+            <div class="key" data-value="3">3</div>
+            <div class="key" data-value="4">4</div>
+            <div class="key" data-value="5">5</div>
+            <div class="key" data-value="6">6</div>
+            <div class="key" data-value="7">7</div>
+            <div class="key" data-value="8">8</div>
+            <div class="key" data-value="9">9</div>
+            <div class="key zero-key" data-value="0">0</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="resetBtn">Новая попытка</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Элементы DOM
+        const numberDisplay = document.getElementById('numberDisplay');
+        const currentDigitSpan = document.getElementById('currentDigit');
+        const resetBtn = document.getElementById('resetBtn');
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+        const attemptDots = document.querySelectorAll('.attempt');
+        const keys = document.querySelectorAll('.key');
+        const messageEl = document.getElementById('message');
+
+        // Переменные игры
+        let targetNumber = [];
+        let currentDigitIndex = 0;
+        let attemptsLeft = 3;
+        let difficulty = 4; // По умолчанию 4 цифры
+        let inactiveKeys = new Set();
+        let guessedKeys = new Set();
+
+        // Инициализация игры
+        initGame();
+
+        // Обработчики событий для клавиш
+        keys.forEach(key => {
+            key.addEventListener('click', () => {
+                if (attemptsLeft > 0 && !key.classList.contains('inactive') && !key.classList.contains('guessed')) {
+                    const guess = parseInt(key.getAttribute('data-value'));
+                    checkGuess(guess, key);
+                }
+            });
+        });
+
+        // Кнопка сброса
+        resetBtn.addEventListener('click', initGame);
+
+        // Выбор сложности
+        difficultyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                difficultyBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                difficulty = parseInt(btn.getAttribute('data-level'));
+                initGame();
+            });
+        });
+
+        // Функция инициализации игры
+        function initGame() {
+            // Генерация случайного числа с уникальными цифрами
+            generateTargetNumber();
+
+            // Сброс индекса текущей цифры
+            currentDigitIndex = 0;
+            currentDigitSpan.textContent = currentDigitIndex + 1;
+
+            // Сброс попыток
+            attemptsLeft = 3;
+            updateAttemptsDisplay();
+
+            // Очистка сообщения
+            messageEl.textContent = '';
+
+            // Активация всех клавиш
+            keys.forEach(key => {
+                key.classList.remove('inactive');
+                key.classList.remove('guessed');
+            });
+            inactiveKeys.clear();
+            guessedKeys.clear();
+
+            // Отрисовка цифр
+            renderDigits();
+        }
+
+        // Генерация целевого числа с уникальными цифрами
+        function generateTargetNumber() {
+            targetNumber = [];
+            const availableDigits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+            // Перемешиваем массив
+            for (let i = availableDigits.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availableDigits[i], availableDigits[j]] = [availableDigits[j], availableDigits[i]];
+            }
+
+            // Берем первые N цифр
+            for (let i = 0; i < difficulty; i++) {
+                targetNumber.push(availableDigits[i]);
+            }
+
+            console.log('Загаданное число:', targetNumber.join(''));
+        }
+
+        // Отрисовка цифр на дисплее
+        function renderDigits() {
+            numberDisplay.innerHTML = '';
+
+            for (let i = 0; i < difficulty; i++) {
+                const digitElement = document.createElement('div');
+                digitElement.className = 'digit';
+
+                const digitSpan = document.createElement('span');
+
+                if (i < currentDigitIndex) {
+                    // Показать уже угаданные цифры
+                    digitSpan.textContent = targetNumber[i];
+                    digitElement.classList.add('correct');
+                } else if (i === currentDigitIndex) {
+                    // Показать текущую цифру как "_"
+                    digitSpan.textContent = '_';
+                } else {
+                    // Скрыть остальные цифры
+                    digitSpan.textContent = '?';
+                }
+
+                digitElement.appendChild(digitSpan);
+                numberDisplay.appendChild(digitElement);
+            }
+        }
+
+        // Получить элемент клавиши по значению
+        function getKeyElement(value) {
+            return document.querySelector(`.key[data-value="${value}"]`);
+        }
+
+        // Проверка введенной цифры
+        function checkGuess(guess, keyElement) {
+            if (attemptsLeft <= 0) return;
+
+            // Показать выбранную цифру
+            messageEl.textContent = `Выбрана цифра: ${guess}`;
+
+            // Проверка на правильность цифры
+            if (guess === targetNumber[currentDigitIndex]) {
+                // Правильно!
+                setTimeout(() => {
+                    messageEl.textContent = 'Верно!';
+
+                    // Помечаем цифру как отгаданную
+                    keyElement.classList.add('guessed');
+                    guessedKeys.add(guess);
+
+                    currentDigitIndex++;
+                    currentDigitSpan.textContent = currentDigitIndex + 1;
+
+                    // Активируем все клавиши для следующей цифры (кроме уже отгаданных)
+                    keys.forEach(key => {
+                        const keyValue = parseInt(key.getAttribute('data-value'));
+                        if (!guessedKeys.has(keyValue)) {
+                            key.classList.remove('inactive');
+                        }
+                    });
+                    inactiveKeys.clear();
+
+                    // Если все цифры угаданы
+                    if (currentDigitIndex >= difficulty) {
+                        setTimeout(() => {
+                            messageEl.textContent = 'Поздравляем! Вы угадали пароль!';
+                            setTimeout(initGame, 2000);
+                        }, 1000);
+                    }
+
+                    // Сброс попыток для следующей цифры
+                    attemptsLeft = 3;
+                    updateAttemptsDisplay();
+
+                    // Обновление отображения
+                    renderDigits();
+                }, 300);
+            } else {
+                // Неправильно!
+                setTimeout(() => {
+                    messageEl.textContent = 'Неверно! Попробуйте другую цифру.';
+                    attemptsLeft--;
+                    updateAttemptsDisplay();
+
+                    // Делаем эту клавишу неактивной
+                    keyElement.classList.add('inactive');
+                    inactiveKeys.add(guess);
+
+                    if (attemptsLeft <= 0) {
+                        setTimeout(() => {
+                            messageEl.textContent = 'Попытки закончились! Начинаем заново.';
+                            setTimeout(initGame, 1000);
+                        }, 800);
+                    }
+                }, 300);
+            }
+        }
+
+        // Обновление отображения попыток
+        function updateAttemptsDisplay() {
+            attemptDots.forEach((dot, index) => {
+                if (index < 3 - attemptsLeft) {
+                    dot.classList.add('used');
+                } else {
+                    dot.classList.remove('used');
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>
